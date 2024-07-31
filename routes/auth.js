@@ -1,9 +1,14 @@
 const express = require("express");
-const { default: mongoose } = require("mongoose");
+const User = require('../Models/User')
+// const { default: mongoose } = require("mongoose");
 const router = express.Router();
+// const { body, validationResult } = require('express-validator');
 
-router.get("/", (req, res) => {
-  obj = {};
-  res.json(obj);
+//Create a User using: POST "/api/auth"
+router.post("/", (req, res) => {
+console.log(req.body);
+const user = User(req.body);
+user.save();
+res.send(req.body);
 });
 module.exports = router;
