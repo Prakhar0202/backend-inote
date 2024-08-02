@@ -4,8 +4,6 @@ const router = express.Router();
 var fetchuser = require("../middleware/fetchuser");
 const { body, validationResult } = require("express-validator");
 
-
-
 // ROUTE : 1 Add a new Note using: POST "/api/auth/addnotes" login required
 
 router.post(
@@ -36,5 +34,17 @@ router.post(
     }
   }
 );
+
+// ROUTE : 2 Fetch All the notes using: GET "/api/auth/fetchallnotes" login required
+
+router.get("/fetchallnotes", fetchuser, async (req, res) => {
+  try {
+    const notes = await Note.find({ user: req.user.id });
+    res.json(notes);
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).send("Internal Server Error");
+  }
+});
 
 module.exports = router;
