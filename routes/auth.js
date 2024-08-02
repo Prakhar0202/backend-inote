@@ -2,22 +2,23 @@ const express = require("express");
 const User = require("../Models/User"); // Assuming you have a User model in the specified path
 const router = express.Router();
 const { body, validationResult } = require("express-validator");
-const bcrypt = require('bcryptjs');
-const jwt = require("jsonwebtoken"); 
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const fetchuser = require("../middleware/fetchuser");
 
-const JWT_SECRET = 'PrakharVerma';
+const JWT_SECRET = "PrakharVerma";
 
 // Create a User using: POST "/api/auth/createuser" No login required
 router.post(
   "/createuser",
   [
-    body("name")
-      .isLength({ min: 3 })
-      .withMessage("Name must be at least 3 characters long"),
-    body("email").isEmail().withMessage("Invalid email address"),
-    body("password")
-      .isLength({ min: 6 })
-      .withMessage("Password must be at least 6 characters long"),
+    body("name", "Name must be at least 3 characters long").isLength({
+      min: 3,
+    }),
+    body("email", "Invalid email address").isEmail(),
+    body("password", "Password must be at least 6 characters long").isLength({
+      min: 6,
+    }),
   ],
   async (req, res) => {
     const errors = validationResult(req);
@@ -43,11 +44,11 @@ router.post(
         email: req.body.email,
       });
       const data = {
-        user:{
-          id: user.id
-        }
-      }
-      const authToken = jwt.sign(data,JWT_SECRET);
+        user: {
+          id: user.id,
+        },
+      };
+      const authToken = jwt.sign(data, JWT_SECRET);
       res.json(authToken);
     } catch (error) {
       console.error(error.message);
@@ -61,8 +62,8 @@ router.post(
 router.post(
   "/login",
   [
-    body("email",'Invalid email address').isEmail(),
-    body("password",'Password cannot be blank').exists()
+    body("email", "Invalid email address").isEmail(),
+    body("password", "Password cannot be blank").exists(),
   ],
   async (req, res) => {
     const errors = validationResult(req);
@@ -70,31 +71,42 @@ router.post(
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const{email,password} = req.body;
-    try{
-      let user = await User.findOne({email: req.body.email});
-      if (!user){
+    const { email, password } = req.body;
+    try {
+      let user = await User.findOne({ email: req.body.email });
+      if (!user) {
         res.status(400).send("Please login with valid credentials");
       }
 
-      const passwordCompare = await bcrypt.compare(password,user.password);
-      if(!passwordCompare) {
+      const passwordCompare = await bcrypt.compare(password, user.password);
+      if (!passwordCompare) {
         res.status(400).send("Please login with valid credentials");
       }
-      
+
       const data = {
-        user:{
-          id: user.id
-        }
-      }
-      const authToken = jwt.sign(data,JWT_SECRET);
+        user: {
+          id: user.id,
+        },
+      };
+      const authToken = jwt.sign(data, JWT_SECRET);
       res.json(authToken);
-
-  
-    } catch(error) {
+    } catch (error) {
       console.error(error.message);
       res.status(500).send("Internal Server Error");
     }
+  }
+);
 
-  })
+// Get LoggedIn user details using: POST "/api/auth/getuser" login required
+
+router.post("/getuser", async (req, res) => {
+  try {
+    const userId = req.user.id;
+    let user = await User.findById(userId).select("-password");
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
 module.exports = router;
