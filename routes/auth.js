@@ -3,10 +3,10 @@ const User = require("../Models/User"); // Assuming you have a User model in the
 const router = express.Router();
 const { body, validationResult } = require("express-validator");
 const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
-const fetchuser = require("../middleware/fetchuser");
+var jwt = require("jsonwebtoken");
+var fetchuser = require("../middleware/fetchuser");
 
-const JWT_SECRET = "PrakharVerma";
+const JWT_SECRET = "Prakhar@Verma";
 
 // Create a User using: POST "/api/auth/createuser" No login required
 router.post(
@@ -99,10 +99,11 @@ router.post(
 
 // Get LoggedIn user details using: POST "/api/auth/getuser" login required
 
-router.post("/getuser", async (req, res) => {
+router.post("/getuser",fetchuser, async (req, res) => {
   try {
     const userId = req.user.id;
     let user = await User.findById(userId).select("-password");
+    res.send(user)
   } catch (error) {
     console.error(error.message);
     res.status(500).send("Internal Server Error");
