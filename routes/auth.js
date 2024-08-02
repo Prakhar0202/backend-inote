@@ -8,7 +8,7 @@ var fetchuser = require("../middleware/fetchuser");
 
 const JWT_SECRET = "Prakhar@Verma";
 
-// Create a User using: POST "/api/auth/createuser" No login required
+// ROUTE 1 : Create a User using: POST "/api/auth/createuser" No login required
 router.post(
   "/createuser",
   [
@@ -26,7 +26,7 @@ router.post(
       return res.status(400).json({ errors: errors.array() });
     }
 
-    //Chech whether user with this email exists already
+    //Check whether user with this email exists already
     try {
       let user = await User.findOne({ email: req.body.email });
       if (user) {
@@ -37,7 +37,7 @@ router.post(
       const salt = await bcrypt.genSalt(10);
       const secPass = await bcrypt.hash(req.body.password, salt);
 
-      //Create a new User
+      // Create a new User
       user = await User.create({
         name: req.body.name,
         password: secPass,
@@ -57,7 +57,7 @@ router.post(
   }
 );
 
-// Authenticate a user using: POST "/api/auth/login" No login required
+// ROUTE : 1 Authenticate a user using: POST "/api/auth/login" No login required
 
 router.post(
   "/login",
@@ -97,7 +97,7 @@ router.post(
   }
 );
 
-// Get LoggedIn user details using: POST "/api/auth/getuser" login required
+// ROUTE : 3 Get LoggedIn user details using: POST "/api/auth/getuser" login required
 
 router.post("/getuser",fetchuser, async (req, res) => {
   try {
