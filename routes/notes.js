@@ -4,7 +4,7 @@ const router = express.Router();
 var fetchuser = require("../middleware/fetchuser");
 const { body, validationResult } = require("express-validator");
 
-// ROUTE 1 : Add a new Note using: POST "/api/notes/addnotes" login required
+// ROUTE 1 : Add a new Note using: POST "/api/notes/addnote" login required
 
 router.post(
   "/addnote",
@@ -47,9 +47,9 @@ router.get("/fetchallnotes", fetchuser, async (req, res) => {
   }
 });
 
-// ROUTE 3 : Update an Existing Note using: PUT "/api/notes/updatenotes" login required
+// ROUTE 3 : Update an Existing Note using: PUT "/api/notes/updatenote" login required
 
-router.put("/updatenotes/:id", fetchuser, async (req, res) => {
+router.put("/updatenote/:id", fetchuser, async (req, res) => {
   try {
     const { title, description, tag } = req.body;
 
@@ -85,4 +85,29 @@ router.put("/updatenotes/:id", fetchuser, async (req, res) => {
     res.status(500).send("Internal Server Error");
   }
 });
+
+// ROUTE 4 : Delete an Existing Note using: DELETE "/api/notes/deletenote" login required
+
+router.delete("/deletenote/:id", fetchuser, async (req, res) => {
+  try {
+    const { title, description, tag } = req.body;
+
+    // Find the note to be deleted and delete it
+    let note = await Note.findById(req.params.id);
+    if (!note) {
+      return res.status(404).send("Not Found");
+    }
+    // Allow Deletion
+    if (note.user.toString() !== req.user.id) {
+      return res.status(401).send("Not Allowed");
+    }
+
+    note = await Note.findByIdAndDelete(req.params.id);
+    res.json({ Success: "Note has been deleted", note: note });
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
 module.exports = router;
