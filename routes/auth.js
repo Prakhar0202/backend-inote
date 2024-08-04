@@ -51,7 +51,8 @@ router.post(
       res.json(authToken);
     } catch (error) {
       console.error(error.message);
-      res.status(500).send("Some error occured");
+      res.status(500).json({ error: "Some error occured" });
+
     }
   }
 );
@@ -74,12 +75,12 @@ router.post(
     try {
       let user = await User.findOne({ email: req.body.email });
       if (!user) {
-        res.status(400).send("Please login with valid credentials");
+        res.status(400).json({error: "Please login with valid credentials"});
       }
 
       const passwordCompare = await bcrypt.compare(password, user.password);
       if (!passwordCompare) {
-        res.status(400).send("Please login with valid credentials");
+        res.status(400).json({error: "Please login with valid credentials"});
       }
 
       const data = {
@@ -91,7 +92,7 @@ router.post(
       res.json(authToken);
     } catch (error) {
       console.error(error.message);
-      res.status(500).send("Internal Server Error");
+      res.status(500).json({error : "Internal Server Error"});
     }
   }
 );
@@ -105,7 +106,7 @@ router.post("/getuser", fetchuser, async (req, res) => {
     res.send(user);
   } catch (error) {
     console.error(error.message);
-    res.status(500).send("Internal Server Error");
+    res.status(500).json({error: "Internal Server Error"});
   }
 });
 

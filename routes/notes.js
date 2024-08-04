@@ -30,7 +30,7 @@ router.post(
       res.json(savedNote);
     } catch (error) {
       console.error(error.message);
-      res.status(500).send("Internal Server Error");
+         res.status(500).json({ error: "Internal Server Error" });
     }
   }
 );
@@ -43,7 +43,7 @@ router.get("/fetchallnotes", fetchuser, async (req, res) => {
     res.json(notes);
   } catch (error) {
     console.error(error.message);
-    res.status(500).send("Internal Server Error");
+       res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
@@ -69,10 +69,10 @@ router.put("/updatenote/:id", fetchuser, async (req, res) => {
 
     let note = await Note.findById(req.params.id);
     if (!note) {
-      return res.status(404).send("Not Found");
+      return res.status(404).json({ error: "Not Allowed" });
     }
     if (note.user.toString() !== req.user.id) {
-      return res.status(401).send("Not Allowed");
+      return res.status(401).json({ error: "Not Allowed" });
     }
     note = await Note.findByIdAndUpdate(
       req.params.id,
@@ -82,7 +82,7 @@ router.put("/updatenote/:id", fetchuser, async (req, res) => {
     res.json(note);
   } catch (error) {
     console.error(error.message);
-    res.status(500).send("Internal Server Error");
+       res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
@@ -95,18 +95,18 @@ router.delete("/deletenote/:id", fetchuser, async (req, res) => {
     // Find the note to be deleted and delete it
     let note = await Note.findById(req.params.id);
     if (!note) {
-      return res.status(404).send("Not Found");
+      return res.status(404).json({ error: "Not Found" });
     }
     // Allow Deletion
     if (note.user.toString() !== req.user.id) {
-      return res.status(401).send("Not Allowed");
+      return res.status(401).json({ error: "Not Allowed" });
     }
 
     note = await Note.findByIdAndDelete(req.params.id);
     res.json({ Success: "Note has been deleted", note: note });
   } catch (error) {
     console.error(error.message);
-    res.status(500).send("Internal Server Error");
+       res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
