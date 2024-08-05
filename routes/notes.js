@@ -1,6 +1,7 @@
 const express = require("express");
 const Note = require("../Models/Note");
 const router = express.Router();
+const mongoose = require("mongoose");
 var fetchuser = require("../middleware/fetchuser");
 const { body, validationResult } = require("express-validator");
 
@@ -90,10 +91,15 @@ router.put("/updatenote/:id", fetchuser, async (req, res) => {
 
 router.delete("/deletenote/:id", fetchuser, async (req, res) => {
   try {
-    const { title, description, tag } = req.body;
+    const { id } = req.params;
+
+    // Check if the ID is valid
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ error: "Invalid ID format" });
+    }
 
     // Find the note to be deleted and delete it
-    let note = await Note.findById(req.params.id);
+    let note = await Note.findById(id);
     if (!note) {
       return res.status(404).json({ error: "Not Found" });
     }
@@ -102,7 +108,7 @@ router.delete("/deletenote/:id", fetchuser, async (req, res) => {
       return res.status(401).json({ error: "Not Allowed" });
     }
 
-    note = await Note.findByIdAndDelete(req.params.id);
+    note = await Note.findByIdAndDelete(id);
     res.json({ Success: "Note has been deleted", note: note });
   } catch (error) {
     console.error(error.message);
